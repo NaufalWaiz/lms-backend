@@ -13,43 +13,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout kode
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # 2. Set up Go
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: 1.23.2
 
-      # 3. Membersihkan semua cache sebelumnya
-      - name: Clear Cache Directories
-        run: |
-          rm -rf ~/.cache/go-build
-          rm -rf ~/go/pkg/mod
-
-      # 4. Cache Go Modules
-      - name: Cache Go Modules
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
-
-      # 5. Install dependencies
       - name: Install Dependencies
         run: |
+          cd $GITHUB_WORKSPACE
           go mod tidy
           go mod download
 
-      # 6. Run Tests
       - name: Run Tests
-        run: go test -v ./...
+        run: |
+          cd $GITHUB_WORKSPACE
+          go test -v ./...
 
-      # 7. Build Application
       - name: Build Application
-        run: go build -o lms
+        run: |
+          cd $GITHUB_WORKSPACE
+          go build -o lms
