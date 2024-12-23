@@ -1,4 +1,4 @@
-name : LMS CI
+name: LMS CI
 
 on:
   push:
@@ -13,25 +13,48 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout kode
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      # 2. Set up Go
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
           go-version: 1.23.2
 
-      - name: Install dependencies
-        run: go mod tidy
+      # 3. Cache Go Modules
+      - name: Cache Go Modules
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
 
-      - name: Run Golangci-lint
+      # 4. Membersihkan cache modul Go (untuk mencegah konflik file)
+      - name: Clean Go Mod Cache
+        run: go clean -modcache
+
+      # 5. Install dependencies
+      - name: Install Dependencies
+        run: |
+          go mod tidy
+          go mod download
+
+      # 6. Jalankan GolangCI-Lint
+      - name: Run GolangCI-Lint
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.62.2
           args: --timeout=5m
 
-      - name: Run tests
+      # 7. Jalankan Test
+      - name: Run Tests
         run: go test -v ./...
 
+      # 8. Build Aplikasi
       - name: Build Application
         run: go build -o lms
