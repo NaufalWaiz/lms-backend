@@ -51,7 +51,7 @@ func (h *ClassHandler) DeleteClass(w http.ResponseWriter, r *http.Request) {
 		if err == sql.ErrNoRows {
 			http.Error(w, "Class not found", http.StatusNotFound)
 		} else {
-			http.Error(w, "Failed to delete class", http.StatusInternalServerError)
+			http.Error(w, "Failed to deleting class", http.StatusInternalServerError)
 		}
 		return
 	}
